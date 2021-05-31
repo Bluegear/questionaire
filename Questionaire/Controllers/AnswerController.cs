@@ -46,6 +46,7 @@ namespace Questionaire.Controllers
                 return BadRequest($"Multiple choices selected for choice type Select is not allowed.");
             }
 
+            List<string> answers = new List<string>();
             foreach (var choice in choices)
             {
                 if (choice.IsProhibited)
@@ -60,7 +61,11 @@ namespace Questionaire.Controllers
 
                 if (Choice.CHOICE_TYPE_TEXT == choice.Type)
                 {
-                    choice.Value = answerViewModel.Text;
+                    answers.Add(answerViewModel.Text);
+                }
+                else
+                {
+                    answers.Add(choice.Value);
                 }
             }
 
@@ -72,7 +77,7 @@ namespace Questionaire.Controllers
                     UserId = answerViewModel.UserId,
                     QuestionId = answerViewModel.QuestionId,
                     QuestionTitle = question.Title,
-                    Value = String.Join("|", choices.Select(c => c.Value).ToList())
+                    Value = String.Join("|", answers)
                 });
             }
             catch(InvalidOperationException)
@@ -90,7 +95,7 @@ namespace Questionaire.Controllers
         {
             string fileName = "answers.csv";
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("answerId, userId, questionId, questionTitle, answer");
+            stringBuilder.AppendLine("answerId, userId, questionId, questionTitle, answer");
 
             //TODO: Select only participants that finished all the questions
             var answers = from a in _dbContext.Answers
@@ -100,7 +105,7 @@ namespace Questionaire.Controllers
             foreach (var answer in answers)
             {
                 string line = $"\"{answer.Id}\", \"{answer.UserId}\", \"{answer.QuestionId}\", \"{answer.QuestionTitle}\", \"{answer.Value}\"";
-                stringBuilder.Append(line);
+                stringBuilder.AppendLine(line);
             }
 
             return File(Encoding.UTF8.GetBytes(stringBuilder.ToString()), "text/csv", fileName);
