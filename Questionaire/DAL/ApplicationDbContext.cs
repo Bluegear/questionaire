@@ -26,6 +26,7 @@ namespace Questionaire.DAL
             modelBuilder.Entity<Question>().ToTable("Questions", "ApplicationDB");
             modelBuilder.Entity<Choice>().ToTable("Choices", "ApplicationDB");
             modelBuilder.Entity<Answer>().ToTable("Answers", "ApplicationDB");
+            modelBuilder.Entity<Answer>(entity => entity.HasIndex("UserId", "QuestionId").IsUnique());
             base.OnModelCreating(modelBuilder);
         }
     }
